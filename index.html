@@ -1,795 +1,446 @@
-html_content = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>金門微醺夏意三日遊</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>金門微醺夏意之旅 🏝️ (手機全功能優化版)</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fuji: '#3B7AAE',
+                        fujiLight: '#EBF2F7',
+                        warmGray: '#F7F7F7',
+                    },
+                    fontFamily: { sans: ['Noto Sans TC', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
     <style>
         body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #f7f9fc;
-            background-image: radial-gradient(#3b7aae 1px, transparent 0), radial-gradient(#3b7aae 1px, #f7f9fc 0);
-            background-size: 24px 24px;
-            background-position: 0 0, 12px 12px;
-            background-opacity: 0.08;
-            padding-bottom: 90px;
+            background-color: #F7F7F7;
+            background-image: radial-gradient(#3B7AAE 1px, transparent 1px);
+            background-size: 20px 20px;
         }
-        .korean-card {
-            border-radius: 24px;
-            box-shadow: 0 8px 24px rgba(59, 122, 174, 0.06);
-            border: 1px solid rgba(59, 122, 174, 0.1);
-        }
-        .nav-blur {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            background-color: rgba(255, 255, 255, 0.85);
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="text-slate-700 max-w-md mx-auto min-h-screen relative shadow-xl bg-white">
+<body class="font-sans text-gray-800 h-screen w-screen flex flex-col overflow-hidden select-none">
 
-    <div class="bg-[#3B7AAE] text-white px-6 pt-8 pb-12 rounded-b-[40px] relative overflow-hidden shadow-lg">
-        <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-        <div class="absolute left-10 bottom-2 w-20 h-20 bg-white/5 rounded-full blur-md"></div>
-        
-        <div class="flex justify-between items-center mb-4">
-            <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm font-medium tracking-wider">
-                <i class="fa-solid fa-plane-departure mr-1"></i> KINMEN TRIP
-            </span>
-            <span class="text-white/80 text-xs"><i class="fa-regular fa-calendar-days mr-1"></i> 3 Days Itinerary</span>
+    <!-- ======================================================= -->
+    <!-- 📱 上半部：固定式記帳與分帳面板 (佔螢幕約 42% 高度) -->
+    <!-- ======================================================= -->
+    <div class="bg-white p-4 shadow-md border-b border-gray-200 shrink-0 z-10">
+        <div class="flex justify-between items-center mb-2">
+            <div>
+                <h1 class="text-lg font-bold text-gray-800 tracking-wide">🏝️ 金門微醺夏意之旅</h1>
+                <p class="text-[10px] text-gray-400">👥 Lee, Lin, Song, Wu · 四人即時拆帳</p>
+            </div>
+            <!-- 快速跳轉天數小按鈕 -->
+            <div class="flex gap-1">
+                <button onclick="scrollToDay('day1-section')" class="bg-fujiLight text-fuji px-2 py-1 rounded-lg text-xs font-bold">D1</button>
+                <button onclick="scrollToDay('day2-section')" class="bg-fujiLight text-fuji px-2 py-1 rounded-lg text-xs font-bold">D2</button>
+                <button onclick="scrollToDay('day3-section')" class="bg-fujiLight text-fuji px-2 py-1 rounded-lg text-xs font-bold">D3</button>
+            </div>
         </div>
-        <h1 class="text-2xl font-bold tracking-tight mb-2">金門微醺夏意三日遊</h1>
-        <p class="text-white/80 text-xs font-light leading-relaxed">
-            探索戰地秘境、漫步閩南古厝、品嚐在地極致美味。這是一份專為你設計的手機隨身智慧行程表。
-        </p>
+        
+        <!-- 輸入區 -->
+        <div class="space-y-2 bg-warmGray p-3 rounded-xl text-xs">
+            <div class="grid grid-cols-2 gap-2">
+                <input id="bill-desc" type="text" placeholder="品項 (例:租車)" class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-fuji bg-white">
+                <input id="bill-amount" type="number" placeholder="金額 (元)" class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-fuji bg-white">
+            </div>
+            
+            <div class="flex items-center justify-between gap-2">
+                <span class="text-gray-500 shrink-0 font-medium">誰墊錢？</span>
+                <div class="grid grid-cols-4 gap-1 w-full">
+                    <label class="flex items-center gap-0.5 bg-white px-1 py-1 rounded-md border border-gray-200 justify-center text-[11px]"><input type="radio" name="payer" value="Lee" checked> Lee</label>
+                    <label class="flex items-center gap-0.5 bg-white px-1 py-1 rounded-md border border-gray-200 justify-center text-[11px]"><input type="radio" name="payer" value="Lin"> Lin</label>
+                    <label class="flex items-center gap-0.5 bg-white px-1 py-1 rounded-md border border-gray-200 justify-center text-[11px]"><input type="radio" name="payer" value="Song"> Song</label>
+                    <label class="flex items-center gap-0.5 bg-white px-1 py-1 rounded-md border border-gray-200 justify-center text-[11px]"><input type="radio" name="payer" value="Wu"> Wu</label>
+                </div>
+            </div>
+            <button onclick="addBillItem()" class="w-full bg-fuji text-white rounded-lg py-1.5 font-bold text-xs shadow-sm active:scale-[0.98] transition-all">👉 新增這筆消費明細</button>
+        </div>
+
+        <!-- 滾動即時結算區 -->
+        <div class="mt-2 grid grid-cols-2 gap-2 pt-2 border-t border-gray-100">
+            <!-- 左小框：消費明細 -->
+            <div class="overflow-y-auto h-[65px] hide-scrollbar text-[11px] space-y-1 border border-dashed border-gray-200 p-1.5 rounded-lg bg-gray-50/50" id="bill-list">
+                <p class="text-center text-gray-400 py-4">暫無花費</p>
+            </div>
+            <!-- 右小框：清算與複製按鈕 -->
+            <div class="flex flex-col justify-between h-[65px]">
+                <div class="text-[10px] text-gray-600 bg-fujiLight/40 p-1.5 rounded-lg overflow-y-auto hide-scrollbar flex-1 leading-tight" id="settlement-result">
+                    均分計算將顯示於此...
+                </div>
+                <button onclick="copyToLine()" class="w-full bg-[#06C755] text-white rounded-md py-1 text-[11px] font-bold flex items-center justify-center gap-1 mt-1 active:scale-[0.98]">
+                    <i class="fa-brands fa-line text-xs"></i> 複製發至 LINE
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div class="px-4 -mt-6">
+    <!-- ======================================================= -->
+    <!-- 🗺️ 下半部：可獨立滾動的行程區 (佔螢幕約 58% 高度) -->
+    <!-- ======================================================= -->
+    <div class="flex-1 overflow-y-auto px-4 py-4 space-y-6 pb-8" id="itinerary-scroll-container">
         
-        <div id="day1-section" class="day-wrapper mb-8">
-            <div class="flex items-center space-x-2 mb-4 pl-2">
-                <span class="bg-[#3B7AAE] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-sm">1</span>
-                <h2 class="text-lg font-bold text-slate-800">Day 1：06/27 (六) 小金門戰地秘境</h2>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-blue-50 text-[#3B7AAE] w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-plane text-base"></i>
-                        </div>
+        <!-- ==================== DAY 1 ==================== -->
+        <div id="day1-section" class="bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-gray-100">
+            <h2 class="text-sm font-bold text-gray-800 flex items-center mb-3 pb-1 border-b border-gray-100">
+                <span class="w-2 h-4 bg-fuji rounded-full mr-1.5"></span>Day 1 · 小金門戰地探險 (06/27)
+            </h2>
+            <div class="space-y-3">
+                <!-- 交通 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-fujiLight text-fuji text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">交通</span>
                         <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded-md font-medium">交通</span>
-                                <h3 class="font-bold text-slate-800 text-sm">去程航班 (B7-8955)</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>07:50 RMQ 台中 ➔ 08:55 KNH 金門</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-slate-50 text-[#3B7AAE] px-2 py-0.5 rounded-full font-medium">#立榮航空</span>
-                            </div>
+                            <h3 class="font-bold text-gray-800 editable-title">立榮航空 B7-8955</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 editable-time"><i class="fa-regular fa-clock mr-1"></i>07:50 台中 ➔ 08:55 金門</p>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>窗邊座位可俯瞰台灣海峽，降落金門前能拍到美麗的海岸線線條。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>建議提早1.5小時抵達台中清泉崗機場，周邊設有外包付費停車場。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-orange-50 text-orange-500 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-utensils text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-0.5 rounded-md font-medium">食物</span>
-                                <h3 class="font-bold text-slate-800 text-sm">喬安牧場</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>11:30</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full font-medium">#必吃</span>
-                                <span class="text-[10px] bg-slate-50 text-slate-600 px-2 py-0.5 rounded-full font-medium">#酒糟牛肉麵</span>
-                            </div>
+                <!-- 食物 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-orange-50 text-orange-500 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">食物</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">喬安牧場</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 editable-time"><i class="fa-regular fa-clock mr-1"></i>11:30</p>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 特色牛肉麵必拍，門口方便停汽機車。</p>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>招牌牛肉麵上桌時高湯現澆、牛肉瞬間變粉嫩的瞬間，錄製短影音效果最佳！</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>餐廳門口即有專屬空地可供免費停放汽機車，非常方便。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-emerald-50 text-emerald-600 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-camera text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-0.5 rounded-md font-medium">景點</span>
-                                <h3 class="font-bold text-slate-800 text-sm">小金門烈嶼巡禮</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>湖井頭戰史館、沙溪堡、九宮坑道</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-medium">#必拍</span>
-                                <span class="text-[10px] bg-slate-50 text-slate-600 px-2 py-0.5 rounded-full font-medium">#最美木棧道</span>
-                            </div>
+                <!-- 景點 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-emerald-50 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">景點</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">小金門 (沙溪堡、九宮坑道)</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 editable-time"><i class="fa-regular fa-clock mr-1"></i>下午行程</p>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 沙溪堡木棧道面向廈門的夕陽超美！</p>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>沙溪堡木棧道盡頭的涼亭是拍攝廈門地際線的絕佳機位，黃昏時分剪影極美；九宮坑道內要利用水面拍出完美倒影。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>過金門大橋後各景點皆有免費停車場。小金門大橋下橋處有加油站可供整備。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-amber-50 text-amber-600 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-mug-saucer text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-amber-50 text-amber-600 text-[10px] px-2 py-0.5 rounded-md font-medium">食物</span>
-                                <h3 class="font-bold text-slate-800 text-sm">膩咖啡</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>午後微醺放鬆</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-medium">#必拍</span>
-                                <span class="text-[10px] bg-slate-50 text-slate-600 px-2 py-0.5 rounded-full font-medium">#老宅改建</span>
-                            </div>
+                <!-- 下午茶 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-orange-50 text-orange-500 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">食物</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">膩咖啡</h3>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 老宅文青風，建議汽機車停在外圍步行。</p>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>店內充滿植物與老件，陽光從窗戶灑落的座位是韓系網美照必爭之地，手捧咖啡杯拍半身照非常有氛圍。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>位於巷弄內，建議將機車或汽車停在外面大馬路旁再徒步走入。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-orange-50 text-orange-500 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-hot-tub-person text-base"></i>
-                        </div>
+                <!-- 晚餐 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-orange-50 text-orange-500 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">食物</span>
                         <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-0.5 rounded-md font-medium">食物</span>
-                                <h3 class="font-bold text-slate-800 text-sm">喜豐樓</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>18:00</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full font-medium">#必吃</span>
-                                <span class="text-[10px] bg-slate-50 text-slate-600 px-2 py-0.5 rounded-full font-medium">#在地手路菜</span>
-                            </div>
+                            <h3 class="font-bold text-gray-800 editable-title">喜豐樓</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 editable-time"><i class="fa-regular fa-clock mr-1"></i>18:00</p>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>傳統金門辦桌菜擺盤大氣，高角度俯拍全桌全景能展現澎湃感。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>附近街道較窄，可尋找周邊公有停車格或步行前往。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-emerald-50 text-emerald-600 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-gopuram text-base"></i>
-                        </div>
+                <!-- 住宿 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-purple-50 text-purple-600 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">酒店</span>
                         <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-0.5 rounded-md font-medium">景點</span>
-                                <h3 class="font-bold text-slate-800 text-sm">水頭聚落</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>得月樓、洋樓群漫步</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-medium">#必拍</span>
-                                <span class="text-[10px] bg-slate-50 text-slate-600 px-2 py-0.5 rounded-full font-medium">#閩南歷史建築</span>
-                            </div>
+                            <h3 class="font-bold text-gray-800 editable-title">海福商務旅館</h3>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>黃昏或夜間剛點燈時，站在得月樓前廣場往上拍，洋樓與防禦塔在深藍夜幕下極具復古美感。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>聚落入口處設有大型免費公共停車場，請勿將車輛駛入古厝窄巷內。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-orange-50 text-orange-500 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-bowl-food text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-0.5 rounded-md font-medium">食物</span>
-                                <h3 class="font-bold text-slate-800 text-sm">金城飯店</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>21:30</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full font-medium">#必吃</span>
-                                <span class="text-[10px] bg-slate-50 text-slate-600 px-2 py-0.5 rounded-full font-medium">#深夜小吃</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
-                </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>傳統老店的煙火氣就是最棒的濾鏡，食物剛起鍋熱氣騰騰的特寫非常有生活感。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>金城市區晚上路邊車位較難找，可停至金城鎮公所後方停車場再步行過來。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-purple-50 text-purple-600 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-hotel text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-purple-50 text-purple-600 text-[10px] px-2 py-0.5 rounded-md font-medium">酒店</span>
-                                <h3 class="font-bold text-slate-800 text-sm">海福商務旅館</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-bed mr-1 text-slate-400"></i>舒適下榻、全館無線網路</p>
-                        </div>
-                    </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
-                </div>
-            </div>
-
-            <div class="bg-[#3B7AAE]/5 border border-[#3B7AAE]/20 rounded-2xl p-4 mt-4 text-xs space-y-2">
-                <div class="flex items-center text-[#3B7AAE] font-bold mb-1">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> 每日出遊神助攻
-                </div>
-                <p>👗 <span class="font-semibold text-slate-700">建議穿著：</span>防風且防曬的輕便穿搭。海邊與島際移動風大，建議攜帶薄外套與帽子（需有防飛綁帶）。</p>
-                <p>☀️ <span class="font-semibold text-slate-700">天氣提示：</span>初夏海島紫外線強烈，海邊走木棧道毫無遮蔽物，請務必定時補擦防曬、多補充水分。</p>
             </div>
         </div>
 
-
-        <div id="day2-section" class="day-wrapper mb-8 hidden">
-            <div class="flex items-center space-x-2 mb-4 pl-2">
-                <span class="bg-[#3B7AAE] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-sm">2</span>
-                <h2 class="text-lg font-bold text-slate-800">Day 2：06/28 (日) 歷史坑道與古鎮夜遊</h2>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-orange-50 text-orange-500 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-egg text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-0.5 rounded-md font-medium">食物</span>
-                                <h3 class="font-bold text-slate-800 text-sm">永春廣東粥</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>金門傳統無米粥早餐</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full font-medium">#必吃</span>
-                            </div>
+        <!-- ==================== DAY 2 ==================== -->
+        <div id="day2-section" class="bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-gray-100">
+            <h2 class="text-sm font-bold text-gray-800 flex items-center mb-3 pb-1 border-b border-gray-100">
+                <span class="w-2 h-4 bg-fuji rounded-full mr-1.5"></span>Day 2 · 古寧頭與古厝夜遊 (06/28)
+            </h2>
+            <div class="space-y-3">
+                <!-- 早餐 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-orange-50 text-orange-500 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">食物</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">永春廣東粥</h3>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 粥糜配上金黃香酥油條超級在地！</p>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>將廣東粥與現炸油條交錯擺放，拍攝油條沾入粥裡的瞬間，最能體現在地美食的精髓。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>位於市區老街內，強烈建議騎機車前往或從外圍停車場步行入內。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-emerald-50 text-emerald-600 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-shield-halved text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-0.5 rounded-md font-medium">景點</span>
-                                <h3 class="font-bold text-slate-800 text-sm">翟山坑道</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>鬼斧神工的戰備水道</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-medium">#必拍</span>
-                            </div>
+                <!-- 景點 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-emerald-50 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">景點</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">翟山坑道</h3>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 水道倒影是靈魂！用廣角拍對稱構圖。</p>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>坑道內光線較暗、水面呈完美鏡面。開啟手機「夜景模式」，站在步道中段拍攝岩壁與水道的無瑕倒影，極度壯觀。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>景區規劃有非常寬敞且完善的免費汽車與機車停車場。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-orange-50 text-orange-500 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-utensils text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-0.5 rounded-md font-medium">食物</span>
-                                <h3 class="font-bold text-slate-800 text-sm">喜悅小館</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>11:30</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full font-medium">#必吃</span>
-                            </div>
+                <!-- 景點2 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-emerald-50 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">景點</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">北山播音牆、古寧頭</h3>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 巨型蜂巢播音牆仰拍非常震撼。</p>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>精緻的家常熱炒，建議捕捉夾起菜餚時煙霧裊裊、色澤誘人的近焦照片。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>門口附近容易臨停汽機車，或於周圍路邊寬敞處靠邊停放。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-emerald-50 text-emerald-600 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-monument text-base"></i>
-                        </div>
+                <!-- 晚餐 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-orange-50 text-orange-500 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">食物</span>
                         <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-0.5 rounded-md font-medium">景點</span>
-                                <h3 class="font-bold text-slate-800 text-sm">北山、古寧頭</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>古寧頭戰史館、北山播音牆、北山洋樓</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-medium">#必拍</span>
-                            </div>
+                            <h3 class="font-bold text-gray-800 editable-title">記德海鮮餐廳</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 editable-time"><i class="fa-regular fa-clock mr-1"></i>18:00</p>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>站在「北山播音牆」正下方向上仰拍，將自己縮小在巨大蜂巢孔洞建築之下，極具視覺衝擊力；北山洋樓上的彈孔牆則是歷史的最佳見證。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>古寧頭戰史館與播音牆皆設有專屬免費停車位，動線流暢。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-amber-50 text-amber-600 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-store text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-amber-50 text-amber-600 text-[10px] px-2 py-0.5 rounded-md font-medium">食物</span>
-                                <h3 class="font-bold text-slate-800 text-sm">百花洋樓喫茶</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>洋樓裡的愜意午後</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-medium">#必拍</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
-                </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>復古中西合璧的洋樓空間，點一份特色甜點，坐在磨石子地板或雕花窗框旁拍照，完美拿捏復古文青風。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>建議將車子停在聚落外圍的大型停車場後，再以愜意的心情散步進來。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-orange-50 text-orange-500 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-fish text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-0.5 rounded-md font-medium">食物</span>
-                                <h3 class="font-bold text-slate-800 text-sm">記德海鮮餐廳</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>18:00</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full font-medium">#必吃</span>
-                                <span class="text-[10px] bg-slate-50 text-slate-600 px-2 py-0.5 rounded-full font-medium">#高粱嗆蟹</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
-                </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>招牌「高粱嗆蟹」色澤晶瑩透亮，用特寫微距拍攝其飽滿多汁的蟹肉，絕對讓人垂涎三尺！</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>人氣名店客流量極大，門口提供少數停車格，若停滿可前往附近路寬處尋找車位。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-emerald-50 text-emerald-600 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-moon text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-0.5 rounded-md font-medium">景點</span>
-                                <h3 class="font-bold text-slate-800 text-sm">夜遊後浦小鎮</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>總兵署、邱良功母節孝坊夜間導覽</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-medium">#必拍</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
-                </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>「總兵署」庭院內數百年歷史的大榕樹在夜間打燈後格外深邃，非常適合拍攝具有時代穿越感的遠景照。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>後浦小鎮核心為步行區。請將車輛停在金門高中收費停車場，再悠閒漫步過來。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-orange-50 text-orange-500 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-beer-mugs-berry text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-0.5 rounded-md font-medium">食物</span>
-                                <h3 class="font-bold text-slate-800 text-sm">大廟口熱炒</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>廟前廣場露天小酌</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full font-medium">#必吃</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
-                </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>坐在大紅燈籠高掛的廟埕廣場，拍下一杯冰涼啤酒與炒沙蟲、炒泡麵等金門限定熱炒的乾杯大合照！</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>此處在北鎮廟前，車輛完全禁止駛入，請一律停在外圍下車徒步進城。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-purple-50 text-purple-600 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-hotel text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-purple-50 text-purple-600 text-[10px] px-2 py-0.5 rounded-md font-medium">酒店</span>
-                                <h3 class="font-bold text-slate-800 text-sm">海福商務旅館</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-bed mr-1 text-slate-400"></i>續住、享用館內便利設施</p>
-                        </div>
-                    </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
-                </div>
-            </div>
-
-            <div class="bg-[#3B7AAE]/5 border border-[#3B7AAE]/20 rounded-2xl p-4 mt-4 text-xs space-y-2">
-                <div class="flex items-center text-[#3B7AAE] font-bold mb-1">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> 每日出遊神助攻
-                </div>
-                <p>👗 <span class="font-semibold text-slate-700">建議穿著：</span>坑道內部終年陰涼潮濕，且地面前期易滑，強烈建議穿著防滑效果佳的運動鞋、休閒鞋，並隨身準備一件輕薄薄外套以免出坑道受涼。</p>
-                <p>☀️ <span class="font-semibold text-slate-700">天氣提示：</span>日間戶外活動紫外線極為強烈，北山一帶無樹蔭遮蔽。不過晚間小鎮微風徐徐，非常適合進行夜間漫步導覽。</p>
             </div>
         </div>
 
-
-        <div id="day3-section" class="day-wrapper mb-8 hidden">
-            <div class="flex items-center space-x-2 mb-4 pl-2">
-                <span class="bg-[#3B7AAE] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-sm">3</span>
-                <h2 class="text-lg font-bold text-slate-800">Day 3：06/29 (一) 獅山砲陣地與沙美摩洛哥</h2>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-orange-50 text-orange-500 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-stroopwafel text-base"></i>
-                        </div>
+        <!-- ==================== DAY 3 ==================== -->
+        <div id="day3-section" class="bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-gray-100">
+            <h2 class="text-sm font-bold text-gray-800 flex items-center mb-3 pb-1 border-b border-gray-100">
+                <span class="w-2 h-4 bg-fuji rounded-full mr-1.5"></span>Day 3 · 獅山砲陣與沙美摩洛哥 (06/29)
+            </h2>
+            <div class="space-y-3">
+                <!-- 景點 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-emerald-50 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">景點</span>
                         <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-0.5 rounded-md font-medium">食物</span>
-                                <h3 class="font-bold text-slate-800 text-sm">金許園</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>超人氣北方麵點、餡餅與韭菜盒</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full font-medium">#必吃</span>
-                            </div>
+                            <h3 class="font-bold text-gray-800 editable-title">馬山觀測站、獅山砲陣地</h3>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>用筷子輕輕戳開金黃酥脆的大餡餅，拍攝裡面豐沛湯汁潺潺流出的動態特寫，令人食指大動。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>人潮洶湧，車輛多採取路邊短暫臨停。請注意避開重要路口。金沙市區外圍有加油站可供油量整備。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-emerald-50 text-emerald-600 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-burst text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-0.5 rounded-md font-medium">景點</span>
-                                <h3 class="font-bold text-slate-800 text-sm">馬山觀測站、獅山砲陣地</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>天下第一哨、震撼的榴彈砲操演練</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-medium">#必拍</span>
-                            </div>
+                <!-- 景點2 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-emerald-50 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">景點</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">沙美摩洛哥</h3>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 土黃色頹屋極具中東異國風，穿鮮豔衣服拍超美！</p>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>在獅山砲陣地切記提早10分鐘卡位前排，錄製完整的砲操發射口令與震撼動作；馬山坑道內往對岸望遠鏡望去的畫面極具戰地臨場感。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>兩個景點皆建有專門的高規格免費大型遊客專屬停車場。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-orange-50 text-orange-500 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-shrimp text-base"></i>
-                        </div>
+                <!-- 交通 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-fujiLight text-fuji text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">交通</span>
                         <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-0.5 rounded-md font-medium">食物</span>
-                                <h3 class="font-bold text-slate-800 text-sm">新天地海產店</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>鮮美金門在地海鮮海產</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full font-medium">#必吃</span>
-                            </div>
+                            <h3 class="font-bold text-gray-800 editable-title">立榮航空 B7-8962</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 editable-time"><i class="fa-regular fa-clock mr-1"></i>18:20 金門 ➔ 19:20 台中</p>
                         </div>
                     </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
                 </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>現撈石蚵海鮮極為澎湃，由正上方直直往下垂直俯拍（平鋪式構圖），拍出來的效果就像美食雜誌般吸睛。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>門口路段寬敞開闊，可以直接將汽機車安全地停放在大馬路兩側。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-emerald-50 text-emerald-600 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-tree-city text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-0.5 rounded-md font-medium">景點</span>
-                                <h3 class="font-bold text-slate-800 text-sm">沙美摩洛哥</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>沙美老街、中東異國風黃土頹屋</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-medium">#必拍</span>
-                                <span class="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-medium">#必買閔式燒餅</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
-                </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>黃土牆在烈日與陰影交界處層次分明。建議穿著白色、亮橘或飽和度高的長裙，站在斑駁的窗框或土牆轉角，一秒拍出極具北非荒漠異國風情的網美大片。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>可停放在沙美車站後方免費公共停車場，接著漫步進老街，順便購買極出名的閩式燒餅當伴手禮。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-amber-50 text-amber-600 w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-cake-candles text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-amber-50 text-amber-600 text-[10px] px-2 py-0.5 rounded-md font-medium">食物</span>
-                                <h3 class="font-bold text-slate-800 text-sm">愜意甜點工作室</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>閩南古厝裡的超人氣法式甜點</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-medium">#必拍</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
-                </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>將精緻奢華的法式塔類甜點，端放在傳統紅磚瓦、燕尾脊的閩南古厝中庭木桌上。這種極致的「新舊對比」具有強烈的視覺美感與張力。</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>位於后浦頭古聚落內，汽機車請嚴格停在聚落路口，切勿強行駛入狹小的古厝步道。</p>
-                </div>
-            </div>
-
-            <div class="bg-white korean-card p-4 mb-4 relative group">
-                <div class="flex items-start justify-between">
-                    <div class="flex space-x-3">
-                        <div class="bg-blue-50 text-[#3B7AAE] w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-plane-arrival text-base"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded-md font-medium">交通</span>
-                                <h3 class="font-bold text-slate-800 text-sm">回程航班 (B7-8962)</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-clock mr-1"></i>18:20 KNH 金門 ➔ 19:20 RMQ 台中</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="text-[10px] bg-slate-50 text-slate-600 px-2 py-0.5 rounded-full font-medium">#滿載而歸</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="editEvent(this)" class="text-slate-400 hover:text-[#3B7AAE] p-1"><i class="fa-regular fa-pen-to-square text-sm"></i></button>
-                </div>
-                <div class="mt-3 pt-3 border-t border-dashed border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/50 p-2 rounded-xl">
-                    <p>💡 <span class="font-medium text-slate-700">拍照小技巧：</span>若遇到晴朗無雲的好天氣，起飛後不久向窗外看去，有機會拍到台灣海峽極致絕美的金黃海上日落奇景！</p>
-                    <p>🚗 <span class="font-medium text-slate-700">停車＆加油：</span>請務必於航班起飛前整整1小時抵達金門尚義機場。還車前，請記得順路到機場附近的加油站將油箱全數加滿（跳停即可）。</p>
-                </div>
-            </div>
-
-            <div class="bg-[#3B7AAE]/5 border border-[#3B7AAE]/20 rounded-2xl p-4 mt-4 text-xs space-y-2">
-                <div class="flex items-center text-[#3B7AAE] font-bold mb-1">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> 每日出遊神助攻
-                </div>
-                <p>👗 <span class="font-semibold text-slate-700">建議穿著：</span>建議穿著高飽和度的亮色、白色系服裝（例如韓系大地色、純白套裝），在沙美摩洛哥的荒涼黃土頹屋背景下，能形成令人驚豔的網美層次感！</p>
-                <p>☀️ <span class="font-semibold text-slate-700">天氣提示：</span>今天是充實的東半島戶外人文大暴走。沙美與馬山一帶體感溫度較高且遮蔽極少，一定要做好物理防曬，並隨時補充水分，避免中暑。</p>
             </div>
         </div>
 
     </div>
 
-    <div id="editModal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
-        <div class="bg-white rounded-[28px] w-full max-w-sm p-6 shadow-2xl border border-slate-100 transform scale-95 transition-all duration-200">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-base font-bold text-slate-800"><i class="fa-regular fa-pen-to-square text-[#3B7AAE] mr-1.5"></i>調整微調行程</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button>
-            </div>
-            <div class="space-y-4">
+    <!-- 彈窗：修改行程（浮動彈窗，專為手機優化尺寸） -->
+    <div id="edit-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-6 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-xs p-5 space-y-4 shadow-xl">
+            <h3 class="text-sm font-bold text-gray-800"><i class="fa-solid fa-pen-to-square text-fuji mr-1"></i> 修改行程內容</h3>
+            <div class="space-y-2">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1">項目/地點名稱</label>
-                    <input type="text" id="modalTitle" class="w-full text-sm px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-[#3B7AAE]">
+                    <label class="text-[11px] text-gray-400 block mb-1">名稱/地點</label>
+                    <input id="edit-input-title" type="text" class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-fuji">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1">時間/副標資訊</label>
-                    <input type="text" id="modalTime" class="w-full text-sm px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-[#3B7AAE]">
+                    <label class="text-[11px] text-gray-400 block mb-1">時間提示</label>
+                    <input id="edit-input-time" type="text" class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-fuji">
                 </div>
-                <button onclick="saveChanges()" class="w-full bg-[#3B7AAE] text-white py-2.5 rounded-xl font-bold text-sm shadow-md shadow-blue-600/10 hover:bg-[#2F6594] transition-colors">確認儲存並更新</button>
             </div>
-        </div>
-    </div>
-
-    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-4 pb-4 pt-2 z-40 bg-gradient-to-t from-[#f7f9fc] via-[#f7f9fc]/90 to-transparent">
-        <div class="nav-blur h-16 rounded-2xl shadow-xl border border-white/40 flex items-center justify-around px-2 text-slate-400">
-            <button id="btn-day1" onclick="switchDay(1)" class="flex flex-col items-center justify-center flex-1 py-1 text-[#3B7AAE] transition-all">
-                <i class="fa-solid fa-calendar-day text-lg"></i>
-                <span class="text-[10px] font-bold mt-0.5">Day 1</span>
-            </button>
-            <button id="btn-day2" onclick="switchDay(2)" class="flex flex-col items-center justify-center flex-1 py-1 hover:text-slate-600 transition-all">
-                <i class="fa-solid fa-calendar-day text-lg"></i>
-                <span class="text-[10px] font-bold mt-0.5">Day 2</span>
-            </button>
-            <button id="btn-day3" onclick="switchDay(3)" class="flex flex-col items-center justify-center flex-1 py-1 hover:text-slate-600 transition-all">
-                <i class="fa-solid fa-calendar-day text-lg"></i>
-                <span class="text-[10px] font-bold mt-0.5">Day 3</span>
-            </button>
+            <div class="flex gap-2 pt-1 text-xs">
+                <button onclick="closeEditModal()" class="w-1/2 bg-gray-100 text-gray-600 rounded-lg py-2">取消</button>
+                <button onclick="saveSpotChange()" class="w-1/2 bg-fuji text-white rounded-lg py-2 font-medium">儲存更新</button>
+            </div>
         </div>
     </div>
 
     <script>
-        let currentTargetTitleNode = null;
-        let currentTargetTimeNode = null;
+        // 快速跳轉天數
+        function scrollToDay(id) {
+            const element = document.getElementById(id);
+            if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
 
-        function switchDay(dayNum) {
-            // Hide all day sections
-            document.querySelectorAll('.day-wrapper').forEach(el => el.classList.add('hidden'));
-            // Show target day section
-            document.getElementById(`day${dayNum}-section`).classList.remove('hidden');
-            
-            // Reset nav button states
-            const buttons = ['btn-day1', 'btn-day2', 'btn-day3'];
-            buttons.forEach((btnId, idx) => {
-                const btn = document.getElementById(btnId);
-                if (idx === (dayNum - 1)) {
-                    btn.classList.add('text-[#3B7AAE]');
-                    btn.classList.remove('text-slate-400', 'hover:text-slate-600');
-                } else {
-                    btn.classList.remove('text-[#3B7AAE]');
-                    btn.classList.add('text-slate-400', 'hover:text-slate-600');
-                }
+        // 修改行程邏輯
+        let currentEditingElement = null;
+        function editSpot(button) {
+            currentEditingElement = button.parentElement;
+            const currentTitle = currentEditingElement.querySelector('.editable-title')?.innerText || '';
+            const currentTime = currentEditingElement.querySelector('.editable-time')?.innerText || '';
+            document.getElementById('edit-input-title').value = currentTitle;
+            document.getElementById('edit-input-time').value = currentTime.replace(/🕒| /g, '');
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+        function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
+        function saveSpotChange() {
+            if (currentEditingElement) {
+                const newTitle = document.getElementById('edit-input-title').value;
+                const newTime = document.getElementById('edit-input-time').value;
+                if(currentEditingElement.querySelector('.editable-title')) currentEditingElement.querySelector('.editable-title').innerText = newTitle;
+                if(currentEditingElement.querySelector('.editable-time') && newTime) currentEditingElement.querySelector('.editable-time').innerHTML = `<i class="fa-regular fa-clock mr-1"></i>${newTime}`;
+            }
+            closeEditModal();
+        }
+
+        // 記帳與拆帳核心邏輯
+        let bills = [];
+        const members = ['Lee', 'Lin', 'Song', 'Wu'];
+
+        function addBillItem() {
+            const desc = document.getElementById('bill-desc').value.trim();
+            const amount = parseFloat(document.getElementById('bill-amount').value);
+            const payer = document.querySelector('input[name="payer"]:checked').value;
+
+            if (!desc || isNaN(amount) || amount <= 0) {
+                alert('請填寫完整項目與金額！');
+                return;
+            }
+
+            bills.push({ id: Date.now(), desc, amount, payer });
+            document.getElementById('bill-desc').value = '';
+            document.getElementById('bill-amount').value = '';
+            renderBills();
+        }
+
+        function deleteBill(id) {
+            bills = bills.filter(b => b.id !== id);
+            renderBills();
+        }
+
+        function renderBills() {
+            const listContainer = document.getElementById('bill-list');
+            if (bills.length === 0) {
+                listContainer.innerHTML = '<p class="text-center text-gray-400 py-4">暫無花費</p>';
+                document.getElementById('settlement-result').innerHTML = '均分計算將顯示於此...';
+                return;
+            }
+
+            // 渲染左側小清單
+            listContainer.innerHTML = bills.map(b => `
+                <div class="flex justify-between items-center bg-white px-2 py-1 rounded-md border border-gray-100 text-[10px]">
+                    <div class="truncate max-w-[65px]">
+                        <span class="font-bold">${b.desc}</span>
+                        <span class="text-[9px] text-fuji block">(${b.payer})</span>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <span class="font-bold text-fuji">$${b.amount}</span>
+                        <button onclick="deleteBill(${b.id})" class="text-red-400"><i class="fa-regular fa-trash-can"></i></button>
+                    </div>
+                </div>
+            `).join('');
+
+            // 計算核心
+            let totalExpenses = 0;
+            let paidBy = { Lee: 0, Lin: 0, Song: 0, Wu: 0 };
+            bills.forEach(b => { totalExpenses += b.amount; paidBy[b.payer] += b.amount; });
+
+            const sharePerPerson = totalExpenses / 4;
+            let balance = {};
+            members.forEach(m => { balance[m] = paidBy[m] - sharePerPerson; });
+
+            let creditors = []; let debtors = [];
+            members.forEach(m => {
+                if (balance[m] > 0) creditors.push({ name: m, amount: balance[m] });
+                if (balance[m] < 0) debtors.push({ name: m, amount: Math.abs(balance[m]) });
             });
-            
-            // Smoothly scroll back to top of document when switching tabs
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            let transferLines = [];
+            let c = 0, d = 0;
+            let credCopy = JSON.parse(JSON.stringify(creditors));
+            let debtCopy = JSON.parse(JSON.stringify(debtors));
+
+            while (c < credCopy.length && d < debtCopy.length) {
+                let credit = credCopy[c]; let debtor = debtCopy[d];
+                let amount = Math.min(credit.amount, debtor.amount);
+                transferLines.push(`▪️${debtor.name} ➔ ${credit.name} $${amount.toFixed(0)}`);
+                credit.amount -= amount; debtor.amount -= amount;
+                if (Math.abs(credit.amount) < 0.1) c++; if (Math.abs(debtor.amount) < 0.1) d++;
+            }
+
+            // 渲染右側清算結果
+            document.getElementById('settlement-result').innerHTML = `
+                <p class="font-bold text-gray-800">總計:$${totalExpenses.toFixed(0)} (均分:$${sharePerPerson.toFixed(0)})</p>
+                <div class="mt-0.5 space-y-0.5 border-t border-gray-200/60 pt-0.5 text-gray-500">
+                    ${transferLines.length > 0 ? transferLines.join('<br>') : '🍀 金額剛好平分！'}
+                </div>
+            `;
         }
 
-        function editEvent(button) {
-            // Traverse DOM to find specific Title and Time nodes
-            const card = button.closest('.korean-card');
-            currentTargetTitleNode = card.querySelector('h3');
-            currentTargetTimeNode = card.querySelector('p');
-            
-            // Set current text values into modal inputs
-            document.getElementById('modalTitle').value = currentTargetTitleNode ? currentTargetTitleNode.innerText.trim() : "";
-            
-            if (currentTargetTimeNode) {
-                // Keep clean preview of the content, removing prefix icons if any
-                document.getElementById('modalTime').value = currentTargetTimeNode.innerText.trim();
-            } else {
-                document.getElementById('modalTime').value = "";
-            }
-            
-            // Show modal popup
-            document.getElementById('editModal').classList.remove('hidden');
-        }
+        function copyToLine() {
+            if (bills.length === 0) { alert('目前沒有花費紀錄可以複製唷！'); return; }
 
-        function closeModal() {
-            document.getElementById('editModal').classList.add('hidden');
-        }
+            let totalExpenses = 0;
+            let paidBy = { Lee: 0, Lin: 0, Song: 0, Wu: 0 };
+            bills.forEach(b => { totalExpenses += b.amount; paidBy[b.payer] += b.amount; });
+            const sharePerPerson = totalExpenses / 4;
 
-        function saveChanges() {
-            const newTitle = document.getElementById('modalTitle').value.trim();
-            const newTime = document.getElementById('modalTime').value.trim();
-            
-            if (currentTargetTitleNode && newTitle) {
-                currentTargetTitleNode.innerText = newTitle;
+            let balance = {};
+            members.forEach(m => { balance[m] = paidBy[m] - sharePerPerson; });
+
+            let creditors = []; let debtors = [];
+            members.forEach(m => {
+                if (balance[m] > 0) creditors.push({ name: m, amount: balance[m] });
+                if (balance[m] < 0) debtors.push({ name: m, amount: Math.abs(balance[m]) });
+            });
+
+            let transferLines = [];
+            let c = 0, d = 0;
+            while (c < creditors.length && d < debtors.length) {
+                let credit = creditors[c]; let debtor = debtors[d];
+                let amount = Math.min(credit.amount, debtor.amount);
+                transferLines.push(`  ▪️ ${debtor.name} ➡️ 匯給 ${credit.name}：$${amount.toFixed(0)} 元`);
+                credit.amount -= amount; debtor.amount -= amount;
+                if (Math.abs(credit.amount) < 0.1) c++; if (Math.abs(debtor.amount) < 0.1) d++;
             }
-            
-            if (currentTargetTimeNode && newTime) {
-                // Intelligently preserve or handle clock vs marker icons based on text type
-                if (newTime.includes('➔') || newTime.includes('台中') || newTime.includes('航班')) {
-                    currentTargetTimeNode.innerHTML = `<i class="fa-regular fa-clock mr-1"></i>${newTime}`;
-                } else if (newTime.includes('、') || newTime.includes('群') || newTime.includes('站')) {
-                    currentTargetTimeNode.innerHTML = `<i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>${newTime}`;
-                } else {
-                    currentTargetTimeNode.innerHTML = `<i class="fa-regular fa-clock mr-1"></i>${newTime}`;
-                }
-            }
-            
-            closeModal();
+
+            let msg = `🏝️ 金門微醺夏意之旅 - 手機分帳報告 🏝️\n`;
+            msg += `💰 總花費金額：$${totalExpenses.toFixed(0)} 元\n`;
+            msg += `💵 每人應均分：$${sharePerPerson.toFixed(0)} 元\n\n`;
+            msg += `📝 【消費明細摘要】\n`;
+            bills.forEach(b => { msg += ` · ${b.desc} : $${b.amount} (${b.payer}代墊)\n`; });
+            msg += `\n📣 【最終轉帳通知】\n`;
+            msg += transferLines.length > 0 ? transferLines.join('\n') : '  ▪️ 大家都互不相欠囉！';
+            msg += `\n\n小夥伴們確認無誤後就可以動手轉帳囉 ❤️`;
+
+            navigator.clipboard.writeText(msg).then(() => {
+                alert('✅ 分帳報告已複製！趕快去 LINE 群組貼上吧！');
+            }).catch(err => { alert('複製失敗，請手動複製。'); });
         }
     </script>
 </body>
-</html>"""
-
-with open("kinmen_travel_app.html", "w", encoding="utf-8") as f:
-    f.write(html_content)
-print("File successfully created!")
+</html>
