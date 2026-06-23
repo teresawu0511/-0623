@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>金門微醺夏意之旅 🏝️ (REST API 直連版)</title>
-    <!-- Tailwind CSS CDN -->
+    <title>金門微醺夏意之旅 🏝️</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     
     <script>
@@ -37,14 +34,11 @@
 </head>
 <body class="font-sans text-gray-800 h-screen w-screen flex flex-col overflow-hidden select-none">
 
-    <!-- ======================================================= -->
-    <!-- 📱 上半部：固定式記帳與分帳面板 -->
-    <!-- ======================================================= -->
     <div class="bg-white p-4 shadow-md border-b border-gray-200 shrink-0 z-10">
         <div class="flex justify-between items-center mb-2">
             <div>
                 <h1 class="text-lg font-bold text-gray-800 tracking-wide">🏝️ 金門微醺夏意之旅</h1>
-                <p class="text-[10px] text-gray-400">👥 Lee, Lin, Song, Wu · 高速直連通道</p>
+                <p class="text-[10px] text-gray-400">👥 Lee, Lin, Song, Wu · 🚀 美國雲端秒級同步中</p>
             </div>
             <div class="flex gap-1">
                 <button onclick="scrollToDay('day1-section')" class="bg-fujiLight text-fuji px-2 py-1 rounded-lg text-xs font-bold">D1</button>
@@ -53,7 +47,6 @@
             </div>
         </div>
         
-        <!-- 輸入區 -->
         <div class="space-y-2 bg-warmGray p-3 rounded-xl text-xs">
             <div class="grid grid-cols-2 gap-2">
                 <input id="bill-desc" type="text" placeholder="品項 (例:租車)" class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-fuji bg-white">
@@ -72,10 +65,9 @@
             <button onclick="addBillItem()" class="w-full bg-fuji text-white rounded-lg py-1.5 font-bold text-xs shadow-sm active:scale-[0.98] transition-all">👉 新增這筆消費明細</button>
         </div>
 
-        <!-- 滾動即時結算區 -->
         <div class="mt-2 grid grid-cols-2 gap-2 pt-2 border-t border-gray-100">
             <div class="overflow-y-auto h-[65px] hide-scrollbar text-[11px] space-y-1 border border-dashed border-gray-200 p-1.5 rounded-lg bg-gray-50/50" id="bill-list">
-                <p class="text-center text-gray-400 py-4">正在連線雲端...</p>
+                <p class="text-center text-gray-400 py-4">連線中...</p>
             </div>
             <div class="flex flex-col justify-between h-[65px]">
                 <div class="text-[10px] text-gray-600 bg-fujiLight/40 p-1.5 rounded-lg overflow-y-auto hide-scrollbar flex-1 leading-tight" id="settlement-result">
@@ -88,9 +80,6 @@
         </div>
     </div>
 
-    <!-- ======================================================= -->
-    <!-- 🗺️ 下半部：行程區 -->
-    <!-- ======================================================= -->
     <div class="flex-1 overflow-y-auto px-4 py-4 space-y-6 pb-8" id="itinerary-scroll-container">
         <div id="loading-itinerary" class="text-center text-xs text-gray-400 py-10">
             <i class="fa-solid fa-circle-notch animate-spin text-fuji text-lg mb-2 block"></i>
@@ -98,7 +87,6 @@
         </div>
     </div>
 
-    <!-- 彈窗：修改/新增行程 -->
     <div id="edit-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-6 z-50">
         <div class="bg-white rounded-2xl w-full max-w-xs p-5 space-y-4 shadow-xl">
             <h3 class="text-sm font-bold text-gray-800" id="modal-title"><i class="fa-solid fa-pen-to-square text-fuji mr-1"></i> 編輯行程</h3>
@@ -129,85 +117,113 @@
         </div>
     </div>
 
-    <!-- ======================================================= -->
-    <!-- 📦 REST API 直連通信邏輯 -->
-    <!-- ======================================================= -->
-    <script>
-        // 🔗 直接繞過 SDK 機制，百分之百精準指向新加坡端點
-        const BASE_URL = "https://kimmem0623-default-rtdb.asia-southeast1.firebasedatabase.app/kinmen_trip";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // 🎯 已精確修正加入：您的專案位置在美國專屬的 databaseURL！
+        const firebaseConfig = {
+            apiKey: "AIzaSyCerSB9_Yxzw8Y1RA7S-a5Ietup1cWXWOU",
+            authDomain: "kinmen-trip-final.firebaseapp.com",
+            projectId: "kinmen-trip-final",
+            storageBucket: "kinmen-trip-final.firebasestorage.app",
+            messagingSenderId: "422747950928",
+            appId: "1:422747950928:web:ea2f253f483c37ec256655",
+            measurementId: "G-XRQBLW96JE",
+            databaseURL: "https://kinmen-trip-final-default-rtdb.firebaseio.com/" 
+        }; 
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
         let localBills = [];
         let localItinerary = {};
         const members = ['Lee', 'Lin', 'Song', 'Wu'];
 
-        const emptyItinerary = {
-            day1: { title: "Day 1 · 06/27 (六)", items: [] },
-            day2: { title: "Day 2 · 06/28 (日)", items: [] },
-            day3: { title: "Day 3 · 06/29 (一)", items: [] }
+        // 📊 預設初始化行程表（對應 image_d41a86.jpg）
+        const defaultItinerary = {
+            day1: {
+                title: "Day 1 · 06/27 (六)",
+                items: [
+                    { id: "d1_1", type: "交通", title: "啟程：立榮航空 B7-8955", info: "台中 RMQ 07:50 ➡️ 金門 KNH 08:55", color: "bg-fujiLight text-fuji" },
+                    { id: "d1_2", type: "美食", title: "午餐：喬安牧場", info: "預約時間：11:30", color: "bg-orange-50 text-orange-500" },
+                    { id: "d1_3", type: "景點", title: "小金門環島精選", info: "湖井頭戰史館、沙溪堡、九宮坑道", color: "bg-emerald-50 text-emerald-600" },
+                    { id: "d1_4", type: "美食", title: "下午茶：膩咖啡", info: "金門文青巷弄午茶", color: "bg-orange-50 text-orange-500" },
+                    { id: "d1_5", type: "美食", title: "晚餐：喜豐樓", info: "預約時間：18:00", color: "bg-orange-50 text-orange-500" },
+                    { id: "d1_6", type: "景點", title: "夜訪：水頭聚落", info: "閩南傳統聚落散步", color: "bg-emerald-50 text-emerald-600" },
+                    { id: "d1_7", type: "美食", title: "宵夜：金城飯店", info: "買回民宿吃（預計 21:30）", color: "bg-orange-50 text-orange-500" },
+                    { id: "d1_8", type: "住宿", title: "海福商務旅館", info: "第一晚入住辦理", color: "bg-purple-50 text-purple-600" }
+                ]
+            },
+            day2: {
+                title: "Day 2 · 06/28 (日)",
+                items: [
+                    { id: "d2_1", type: "美食", title: "早餐：永春廣東粥", info: "金門必吃在地早點", color: "bg-orange-50 text-orange-500" },
+                    { id: "d2_2", type: "景點", title: "翟山坑道", info: "磅礡震撼的戰地鬼斧神工", color: "bg-emerald-50 text-emerald-600" },
+                    { id: "d2_3", type: "美食", title: "午餐：喜悅小館", info: "預約時間：11:30", color: "bg-orange-50 text-orange-500" },
+                    { id: "d2_4", type: "景點", title: "北山、古寧頭戰史館", info: "歷史與戰地前線風情", color: "bg-emerald-50 text-emerald-600" },
+                    { id: "d2_5", type: "美食", title: "下午茶：百花洋樓喫茶", info: "老洋房裡悠閒喝茶", color: "bg-orange-50 text-orange-500" },
+                    { id: "d2_6", type: "美食", title: "晚餐：記德海鮮餐廳", info: "預約時間：18:00 (高人氣海鮮)", color: "bg-orange-50 text-orange-500" },
+                    { id: "d2_7", type: "景點", title: "夜遊後浦小鎮", info: "導覽散步行程", color: "bg-emerald-50 text-emerald-600" },
+                    { id: "d2_8", type: "美食", title: "宵夜：大廟口熱炒", info: "微醺夏意夜間必備", color: "bg-orange-50 text-orange-500" },
+                    { id: "d2_9", type: "住宿", title: "海福商務旅館", info: "第二晚續住", color: "bg-purple-50 text-purple-600" }
+                ]
+            },
+            day3: {
+                title: "Day 3 · 06/29 (一)",
+                items: [
+                    { id: "d3_1", type: "美食", title: "早餐：金許園", info: "美味中式麵點韭菜盒", color: "bg-orange-50 text-orange-500" },
+                    { id: "d3_2", type: "景點", title: "馬山觀測站、獅山砲陣地", info: "看砲操表演與望遠鏡瞭望", color: "bg-emerald-50 text-emerald-600" },
+                    { id: "d3_3", type: "美食", title: "午餐：新天地海產店", info: "最後一天海味大餐", color: "bg-orange-50 text-orange-500" },
+                    { id: "d3_4", type: "景點", title: "沙美摩洛哥", info: "網美必拍台版中東廢墟風", color: "bg-emerald-50 text-emerald-600" },
+                    { id: "d3_5", type: "美食", title: "下午茶：愜意甜點工作室", info: "閩南古厝裡吃法式甜點", color: "bg-orange-50 text-orange-500" },
+                    { id: "d3_6", type: "交通", title: "返程：立榮航空 B7-8962", info: "金門 KNH 18:20 ➡️ 台中 RMQ 19:20", color: "bg-fujiLight text-fuji" }
+                ]
+            }
         };
 
-        // 核心：自資料庫拉取最新數據
-        async function fetchAllData() {
-            try {
-                const res = await fetch(`${BASE_URL}.json`);
-                const data = await res.json();
-                
-                // 1. 處理花費資料
-                localBills = [];
-                if (data && data.bills) {
-                    Object.keys(data.bills).forEach(key => {
-                        localBills.push({ id: key, ...data.bills[key] });
-                    });
-                }
-                renderBills();
-
-                // 2. 處理行程資料
-                if (!data || !data.itinerary) {
-                    // 若資料庫全空，自動初始化空白結構
-                    await fetch(`${BASE_URL}/itinerary.json`, {
-                        method: 'PUT',
-                        body: JSON.stringify(emptyItinerary)
-                    });
-                    localItinerary = emptyItinerary;
-                } else {
-                    localItinerary = data.itinerary;
-                }
-                renderItinerary(localItinerary);
-
-            } catch (err) {
-                console.error("資料庫連線失敗:", err);
+        // 監聽雲端花費資料
+        onValue(ref(db, 'kinmen_trip/bills'), (snapshot) => {
+            const data = snapshot.val();
+            localBills = [];
+            if (data) {
+                Object.keys(data).forEach(key => { localBills.push({ id: key, ...data[key] }); });
             }
-        }
+            renderBills();
+        });
 
-        // 記帳：新增
-        async function addBillItem() {
+        // 監聽雲端行程資料
+        onValue(ref(db, 'kinmen_trip/itinerary'), (snapshot) => {
+            let data = snapshot.val();
+            if (!data) {
+                // 如果資料庫是全空的，立刻自動幫您把行程寫入雲端打底
+                set(ref(db, 'kinmen_trip/itinerary'), defaultItinerary);
+                data = defaultItinerary;
+            }
+            localItinerary = data;
+            renderItinerary(data);
+        });
+
+        // 記帳：新增項目
+        window.addBillItem = function() {
             const desc = document.getElementById('bill-desc').value.trim();
             const amount = parseFloat(document.getElementById('bill-amount').value);
             const payer = document.querySelector('input[name="payer"]:checked').value;
             if (!desc || isNaN(amount) || amount <= 0) return alert('請填寫完整項目與金額！');
-
-            await fetch(`${BASE_URL}/bills.json`, {
-                method: 'POST',
-                body: JSON.stringify({ desc, amount, payer })
-            });
-
+            push(ref(db, 'kinmen_trip/bills'), { desc, amount, payer });
             document.getElementById('bill-desc').value = '';
             document.getElementById('bill-amount').value = '';
-            fetchAllData();
-        }
+        };
 
-        // 記帳：刪除
-        async function deleteBill(id) {
-            await fetch(`${BASE_URL}/bills/${id}.json`, { method: 'DELETE' });
-            fetchAllData();
-        }
+        // 記帳：刪除項目
+        window.deleteBill = function(id) { remove(ref(db, `kinmen_trip/bills/${id}`)); };
 
         let targetDayKey = null; 
         let targetSpotId = null; 
         let isEditMode = false;
 
-        // 行程：新增按鈕
-        function openAddModal(dayKey) {
+        // 行程：觸發新增按鈕
+        window.openAddModal = function(dayKey) {
             isEditMode = false;
             targetDayKey = dayKey;
             document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-plus text-fuji mr-1"></i> 新增行程項目';
@@ -215,16 +231,14 @@
             document.getElementById('edit-input-time').value = '';
             document.getElementById('edit-input-type').value = '景點';
             document.getElementById('edit-modal').style.display = 'flex';
-        }
+        };
 
-        // 行程：編輯按鈕
-        function editSpot(dayKey, spotId) {
+        // 行程：觸發編輯按鈕
+        window.editSpot = function(dayKey, spotId) {
             isEditMode = true;
             targetDayKey = dayKey; 
             targetSpotId = spotId;
-            const dayData = localItinerary[dayKey] || {};
-            const items = dayData.items || [];
-            const spot = items.find(item => item.id === spotId);
+            const spot = localItinerary[dayKey].items.find(item => item.id === spotId);
             if (spot) {
                 document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-fuji mr-1"></i> 編輯行程項目';
                 document.getElementById('edit-input-title').value = spot.title;
@@ -232,25 +246,19 @@
                 document.getElementById('edit-input-type').value = spot.type || '景點';
                 document.getElementById('edit-modal').style.display = 'flex';
             }
-        }
+        };
 
         // 行程：刪除項目
-        async function deleteSpot(dayKey, spotId) {
+        window.deleteSpot = function(dayKey, spotId) {
             if(!confirm('確定要刪除此行程嗎？')) return;
-            const currentItems = localItinerary[dayKey].items || [];
-            const dayItems = currentItems.filter(item => item.id !== spotId);
-            
-            await fetch(`${BASE_URL}/itinerary/${dayKey}/items.json`, {
-                method: 'PUT',
-                body: JSON.stringify(dayItems)
-            });
-            fetchAllData();
-        }
+            const dayItems = localItinerary[dayKey].items.filter(item => item.id !== spotId);
+            set(ref(db, `kinmen_trip/itinerary/${dayKey}/items`), dayItems);
+        };
 
-        function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
+        window.closeEditModal = function() { document.getElementById('edit-modal').style.display = 'none'; };
 
-        // 行程：儲存更新
-        async function saveSpotChange() {
+        // 行程：儲存變更
+        window.saveSpotChange = function() {
             const newTitle = document.getElementById('edit-input-title').value.trim();
             const newInfo = document.getElementById('edit-input-time').value.trim();
             const newType = document.getElementById('edit-input-type').value;
@@ -264,7 +272,7 @@
                 "其他": "bg-gray-100 text-gray-600"
             };
 
-            let dayItems = (localItinerary[targetDayKey] && localItinerary[targetDayKey].items) ? [...localItinerary[targetDayKey].items] : [];
+            let dayItems = localItinerary[targetDayKey].items ? [...localItinerary[targetDayKey].items] : [];
             
             if (isEditMode) {
                 const idx = dayItems.findIndex(item => item.id === targetSpotId);
@@ -284,19 +292,15 @@
                 });
             }
 
-            await fetch(`${BASE_URL}/itinerary/${targetDayKey}/items.json`, {
-                method: 'PUT',
-                body: JSON.stringify(dayItems)
+            set(ref(db, `kinmen_trip/itinerary/${targetDayKey}/items`), dayItems).then(() => { 
+                closeEditModal(); 
             });
-            
-            closeEditModal();
-            fetchAllData();
-        }
+        };
 
-        function scrollToDay(id) {
+        window.scrollToDay = function(id) {
             const el = document.getElementById(id);
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        };
 
         function renderBills() {
             const listContainer = document.getElementById('bill-list');
@@ -388,7 +392,7 @@
             container.innerHTML = html;
         }
 
-        function copyToLine() {
+        window.copyToLine = function() {
             if (localBills.length === 0) return alert('目前沒有花費紀錄可以複製唷！');
             let totalExpenses = 0; let paidBy = { Lee: 0, Lin: 0, Song: 0, Wu: 0 };
             localBills.forEach(b => { totalExpenses += b.amount; paidBy[b.payer] += b.amount; });
@@ -403,7 +407,7 @@
             while (c < creditors.length && d < debtors.length) {
                 let credit = creditors[c]; let debtor = debtors[d];
                 let amount = Math.min(credit.amount, debtor.amount);
-                transferLines.push(`  ▪️ ${debtor.name} ➡️ 匯給 ${credit.name}：$${amount.toFixed(0)} 元`);
+                transferLines.push("  ▪️ " + debtor.name + " ➡️ 匯給 " + credit.name + "：$" + amount.toFixed(0) + " 元");
                 credit.amount -= amount; debtor.amount -= amount;
                 if (Math.abs(credit.amount) < 0.1) c++; if (Math.abs(debtor.amount) < 0.1) d++;
             }
@@ -411,12 +415,6 @@
             localBills.forEach(b => { msg += ` · ${b.desc} : $${b.amount} (${b.payer}代墊)\n`; });
             msg += `\n📣 【最終轉帳通知】\n` + (transferLines.length > 0 ? transferLines.join('\n') : '  ▪️ 大家都互不相欠囉！');
             navigator.clipboard.writeText(msg).then(() => { alert('✅ 分帳報告已複製！趕快去 LINE 群組貼上吧！'); });
-        }
-
-        // 頁面加載完成後自動載入資料，並設定每 5 秒自動重新載入實現簡易同步
-        window.onload = () => {
-            fetchAllData();
-            setInterval(fetchAllData, 5000); 
         };
     </script>
 </body>
