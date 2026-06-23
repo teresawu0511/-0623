@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>金門微醺夏意之旅 🏝️ (Firebase 雲端同步版)</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     
     <script>
@@ -34,6 +37,9 @@
 </head>
 <body class="font-sans text-gray-800 h-screen w-screen flex flex-col overflow-hidden select-none">
 
+    <!-- ======================================================= -->
+    <!-- 📱 上半部：固定式記帳與分帳面板 -->
+    <!-- ======================================================= -->
     <div class="bg-white p-4 shadow-md border-b border-gray-200 shrink-0 z-10">
         <div class="flex justify-between items-center mb-2">
             <div>
@@ -47,6 +53,7 @@
             </div>
         </div>
         
+        <!-- 輸入區 -->
         <div class="space-y-2 bg-warmGray p-3 rounded-xl text-xs">
             <div class="grid grid-cols-2 gap-2">
                 <input id="bill-desc" type="text" placeholder="品項 (例:租車)" class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-fuji bg-white">
@@ -65,6 +72,7 @@
             <button onclick="addBillItem()" class="w-full bg-fuji text-white rounded-lg py-1.5 font-bold text-xs shadow-sm active:scale-[0.98] transition-all">👉 新增這筆消費明細</button>
         </div>
 
+        <!-- 滾動即時結算區 -->
         <div class="mt-2 grid grid-cols-2 gap-2 pt-2 border-t border-gray-100">
             <div class="overflow-y-auto h-[65px] hide-scrollbar text-[11px] space-y-1 border border-dashed border-gray-200 p-1.5 rounded-lg bg-gray-50/50" id="bill-list">
                 <p class="text-center text-gray-400 py-4">連線中...</p>
@@ -80,6 +88,9 @@
         </div>
     </div>
 
+    <!-- ======================================================= -->
+    <!-- 🗺️ 下半部：行程區 -->
+    <!-- ======================================================= -->
     <div class="flex-1 overflow-y-auto px-4 py-4 space-y-6 pb-8" id="itinerary-scroll-container">
         <div id="loading-itinerary" class="text-center text-xs text-gray-400 py-10">
             <i class="fa-solid fa-circle-notch animate-spin text-fuji text-lg mb-2 block"></i>
@@ -87,6 +98,7 @@
         </div>
     </div>
 
+    <!-- 彈窗：修改/新增行程 -->
     <div id="edit-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-6 z-50">
         <div class="bg-white rounded-2xl w-full max-w-xs p-5 space-y-4 shadow-xl">
             <h3 class="text-sm font-bold text-gray-800" id="modal-title"><i class="fa-solid fa-pen-to-square text-fuji mr-1"></i> 編輯行程</h3>
@@ -117,6 +129,9 @@
         </div>
     </div>
 
+    <!-- ======================================================= -->
+    <!-- 📦 Firebase 核心邏輯 -->
+    <!-- ======================================================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -129,18 +144,18 @@
             messagingSenderId: "204852168975",
             appId: "1:204852168975:web:0fd75bde6a31727dbd167a",
             measurementId: "G-YN5244M53Y",
-            // 🔗 已成功修正為您專屬的新加坡 Realtime Database 網址
-            databaseURL: "https://kimmem0623-default-rtdb.asia-southeast1.firebasedatabase.app/" 
+            // 🛠️ 修正重點：強制在配置與實例化時明確指定包含完整 Region 的新加坡 URL 結尾
+            databaseURL: "https://kimmem0623-default-rtdb.asia-southeast1.firebasedatabase.app/"
         }; 
 
         const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        // 🛠️ 雙重保險：手動將 URL 傳入 getDatabase() 阻止 SDK 預設連向美國節點
+        const db = getDatabase(app, "https://kimmem0623-default-rtdb.asia-southeast1.firebasedatabase.app/");
 
         let localBills = [];
         let localItinerary = {};
         const members = ['Lee', 'Lin', 'Song', 'Wu'];
 
-        // 🟢 乾淨無預設資料的空白架構
         const emptyItinerary = {
             day1: { title: "Day 1 · 06/27 (六)", items: [] },
             day2: { title: "Day 2 · 06/28 (日)", items: [] },
@@ -182,7 +197,6 @@
         // 記帳：刪除項目
         window.deleteBill = function(id) { remove(ref(db, `kinmen_trip/bills/${id}`)); };
 
-        // 行程彈窗控制變數
         let targetDayKey = null; 
         let targetSpotId = null; 
         let isEditMode = false;
@@ -222,14 +236,13 @@
 
         window.closeEditModal = function() { document.getElementById('edit-modal').style.display = 'none'; };
 
-        // 行程：儲存變更 (包含新增或修改)
+        // 行程：儲存變更
         window.saveSpotChange = function() {
             const newTitle = document.getElementById('edit-input-title').value.trim();
             const newInfo = document.getElementById('edit-input-time').value.trim();
             const newType = document.getElementById('edit-input-type').value;
             if (!newTitle) return alert('名稱不可為空');
 
-            // 根據類別對應背景顏色
             let colorMap = {
                 "景點": "bg-emerald-50 text-emerald-600",
                 "美食": "bg-orange-50 text-orange-500",
@@ -263,13 +276,11 @@
             });
         };
 
-        // 錨點滾動
         window.scrollToDay = function(id) {
             const el = document.getElementById(id);
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
 
-        // 渲染記帳畫面
         function renderBills() {
             const listContainer = document.getElementById('bill-list');
             if (localBills.length === 0) {
@@ -316,7 +327,6 @@
             `;
         }
 
-        // 渲染行程畫面 (整合自由新增與刪除功能)
         function renderItinerary(data) {
             const container = document.getElementById('itinerary-scroll-container');
             let html = '';
@@ -361,7 +371,6 @@
             container.innerHTML = html;
         }
 
-        // 複製到 LINE 功能
         window.copyToLine = function() {
             if (localBills.length === 0) return alert('目前沒有花費紀錄可以複製唷！');
             let totalExpenses = 0; let paidBy = { Lee: 0, Lin: 0, Song: 0, Wu: 0 };
