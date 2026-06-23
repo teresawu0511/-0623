@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>金門微醺夏意之旅 🏝️ (手機全功能優化版)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fuji: '#3B7AAE',
+                        fujiLight: '#EBF2F7',
+                        warmGray: '#F7F7F7',
+                    },
+                    fontFamily: { sans: ['Noto Sans TC', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F7F7F7;
+            background-image: radial-gradient(#3B7AAE 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="font-sans text-gray-800 h-screen w-screen flex flex-col overflow-hidden select-none">
+
+    <!-- ======================================================= -->
+    <!-- 📱 上半部：固定式記帳與分帳面板 (佔螢幕約 42% 高度) -->
+    <!-- ======================================================= -->
+    <div class="bg-white p-4 shadow-md border-b border-gray-200 shrink-0 z-10">
+        <div class="flex justify-between items-center mb-2">
+            <div>
+                <h1 class="text-lg font-bold text-gray-800 tracking-wide">🏝️ 金門微醺夏意之旅</h1>
+                <p class="text-[10px] text-gray-400">👥 Lee, Lin, Song, Wu · 四人即時拆帳</p>
+            </div>
+            <!-- 快速跳轉天數小按鈕 -->
+            <div class="flex gap-1">
+                <button onclick="scrollToDay('day1-section')" class="bg-fujiLight text-fuji px-2 py-1 rounded-lg text-xs font-bold">D1</button>
+                <button onclick="scrollToDay('day2-section')" class="bg-fujiLight text-fuji px-2 py-1 rounded-lg text-xs font-bold">D2</button>
+                <button onclick="scrollToDay('day3-section')" class="bg-fujiLight text-fuji px-2 py-1 rounded-lg text-xs font-bold">D3</button>
+            </div>
+        </div>
+        
+        <!-- 輸入區 -->
+        <div class="space-y-2 bg-warmGray p-3 rounded-xl text-xs">
+            <div class="grid grid-cols-2 gap-2">
+                <input id="bill-desc" type="text" placeholder="品項 (例:租車)" class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-fuji bg-white">
+                <input id="bill-amount" type="number" placeholder="金額 (元)" class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-fuji bg-white">
+            </div>
+            
+            <div class="flex items-center justify-between gap-2">
+                <span class="text-gray-500 shrink-0 font-medium">誰墊錢？</span>
+                <div class="grid grid-cols-4 gap-1 w-full">
+                    <label class="flex items-center gap-0.5 bg-white px-1 py-1 rounded-md border border-gray-200 justify-center text-[11px]"><input type="radio" name="payer" value="Lee" checked> Lee</label>
+                    <label class="flex items-center gap-0.5 bg-white px-1 py-1 rounded-md border border-gray-200 justify-center text-[11px]"><input type="radio" name="payer" value="Lin"> Lin</label>
+                    <label class="flex items-center gap-0.5 bg-white px-1 py-1 rounded-md border border-gray-200 justify-center text-[11px]"><input type="radio" name="payer" value="Song"> Song</label>
+                    <label class="flex items-center gap-0.5 bg-white px-1 py-1 rounded-md border border-gray-200 justify-center text-[11px]"><input type="radio" name="payer" value="Wu"> Wu</label>
+                </div>
+            </div>
+            <button onclick="addBillItem()" class="w-full bg-fuji text-white rounded-lg py-1.5 font-bold text-xs shadow-sm active:scale-[0.98] transition-all">👉 新增這筆消費明細</button>
+        </div>
+
+        <!-- 滾動即時結算區 -->
+        <div class="mt-2 grid grid-cols-2 gap-2 pt-2 border-t border-gray-100">
+            <!-- 左小框：消費明細 -->
+            <div class="overflow-y-auto h-[65px] hide-scrollbar text-[11px] space-y-1 border border-dashed border-gray-200 p-1.5 rounded-lg bg-gray-50/50" id="bill-list">
+                <p class="text-center text-gray-400 py-4">暫無花費</p>
+            </div>
+            <!-- 右小框：清算與複製按鈕 -->
+            <div class="flex flex-col justify-between h-[65px]">
+                <div class="text-[10px] text-gray-600 bg-fujiLight/40 p-1.5 rounded-lg overflow-y-auto hide-scrollbar flex-1 leading-tight" id="settlement-result">
+                    均分計算將顯示於此...
+                </div>
+                <button onclick="copyToLine()" class="w-full bg-[#06C755] text-white rounded-md py-1 text-[11px] font-bold flex items-center justify-center gap-1 mt-1 active:scale-[0.98]">
+                    <i class="fa-brands fa-line text-xs"></i> 複製發至 LINE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- 🗺️ 下半部：可獨立滾動的行程區 (佔螢幕約 58% 高度) -->
+    <!-- ======================================================= -->
+    <div class="flex-1 overflow-y-auto px-4 py-4 space-y-6 pb-8" id="itinerary-scroll-container">
+        
+        <!-- ==================== DAY 1 ==================== -->
+        <div id="day1-section" class="bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-gray-100">
+            <h2 class="text-sm font-bold text-gray-800 flex items-center mb-3 pb-1 border-b border-gray-100">
+                <span class="w-2 h-4 bg-fuji rounded-full mr-1.5"></span>Day 1 · 小金門戰地探險 (06/27)
+            </h2>
+            <div class="space-y-3">
+                <!-- 交通 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-fujiLight text-fuji text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">交通</span>
+                        <div>
+                            <h3 class="font-bold text-gray-800 editable-title">立榮航空 B7-8955</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 editable-time"><i class="fa-regular fa-clock mr-1"></i>07:50 台中 ➔ 08:55 金門</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 食物 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-orange-50 text-orange-500 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">食物</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">喬安牧場</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 editable-time"><i class="fa-regular fa-clock mr-1"></i>11:30</p>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 特色牛肉麵必拍，門口方便停汽機車。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 景點 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-emerald-50 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">景點</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">小金門 (沙溪堡、九宮坑道)</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 editable-time"><i class="fa-regular fa-clock mr-1"></i>下午行程</p>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 沙溪堡木棧道面向廈門的夕陽超美！</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 下午茶 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-orange-50 text-orange-500 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">食物</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">膩咖啡</h3>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 老宅文青風，建議汽機車停在外圍步行。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 晚餐 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-orange-50 text-orange-500 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">食物</span>
+                        <div>
+                            <h3 class="font-bold text-gray-800 editable-title">喜豐樓</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 editable-time"><i class="fa-regular fa-clock mr-1"></i>18:00</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 住宿 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-purple-50 text-purple-600 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">酒店</span>
+                        <div>
+                            <h3 class="font-bold text-gray-800 editable-title">海福商務旅館</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== DAY 2 ==================== -->
+        <div id="day2-section" class="bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-gray-100">
+            <h2 class="text-sm font-bold text-gray-800 flex items-center mb-3 pb-1 border-b border-gray-100">
+                <span class="w-2 h-4 bg-fuji rounded-full mr-1.5"></span>Day 2 · 古寧頭與古厝夜遊 (06/28)
+            </h2>
+            <div class="space-y-3">
+                <!-- 早餐 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-orange-50 text-orange-500 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">食物</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">永春廣東粥</h3>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 粥糜配上金黃香酥油條超級在地！</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 景點 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-emerald-50 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">景點</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">翟山坑道</h3>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 水道倒影是靈魂！用廣角拍對稱構圖。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 景點2 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-emerald-50 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">景點</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">北山播音牆、古寧頭</h3>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 巨型蜂巢播音牆仰拍非常震撼。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 晚餐 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-orange-50 text-orange-500 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">食物</span>
+                        <div>
+                            <h3 class="font-bold text-gray-800 editable-title">記德海鮮餐廳</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 editable-time"><i class="fa-regular fa-clock mr-1"></i>18:00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== DAY 3 ==================== -->
+        <div id="day3-section" class="bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-gray-100">
+            <h2 class="text-sm font-bold text-gray-800 flex items-center mb-3 pb-1 border-b border-gray-100">
+                <span class="w-2 h-4 bg-fuji rounded-full mr-1.5"></span>Day 3 · 獅山砲陣與沙美摩洛哥 (06/29)
+            </h2>
+            <div class="space-y-3">
+                <!-- 景點 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-emerald-50 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">景點</span>
+                        <div>
+                            <h3 class="font-bold text-gray-800 editable-title">馬山觀測站、獅山砲陣地</h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- 景點2 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-emerald-50 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">景點</span>
+                        <div class="w-full pr-2">
+                            <h3 class="font-bold text-gray-800 editable-title">沙美摩洛哥</h3>
+                            <p class="mt-1 text-[10px] text-gray-500 bg-warmGray p-2 rounded-lg">💡 土黃色頹屋極具中東異國風，穿鮮豔衣服拍超美！</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 交通 -->
+                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 relative">
+                    <button onclick="editSpot(this)" class="absolute right-2 top-2 text-gray-400 text-xs"><i class="fa-solid fa-pen"></i></button>
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="bg-fujiLight text-fuji text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">交通</span>
+                        <div>
+                            <h3 class="font-bold text-gray-800 editable-title">立榮航空 B7-8962</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 editable-time"><i class="fa-regular fa-clock mr-1"></i>18:20 金門 ➔ 19:20 台中</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 彈窗：修改行程（浮動彈窗，專為手機優化尺寸） -->
+    <div id="edit-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-6 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-xs p-5 space-y-4 shadow-xl">
+            <h3 class="text-sm font-bold text-gray-800"><i class="fa-solid fa-pen-to-square text-fuji mr-1"></i> 修改行程內容</h3>
+            <div class="space-y-2">
+                <div>
+                    <label class="text-[11px] text-gray-400 block mb-1">名稱/地點</label>
+                    <input id="edit-input-title" type="text" class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-fuji">
+                </div>
+                <div>
+                    <label class="text-[11px] text-gray-400 block mb-1">時間提示</label>
+                    <input id="edit-input-time" type="text" class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-fuji">
+                </div>
+            </div>
+            <div class="flex gap-2 pt-1 text-xs">
+                <button onclick="closeEditModal()" class="w-1/2 bg-gray-100 text-gray-600 rounded-lg py-2">取消</button>
+                <button onclick="saveSpotChange()" class="w-1/2 bg-fuji text-white rounded-lg py-2 font-medium">儲存更新</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 快速跳轉天數
+        function scrollToDay(id) {
+            const element = document.getElementById(id);
+            if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // 修改行程邏輯
+        let currentEditingElement = null;
+        function editSpot(button) {
+            currentEditingElement = button.parentElement;
+            const currentTitle = currentEditingElement.querySelector('.editable-title')?.innerText || '';
+            const currentTime = currentEditingElement.querySelector('.editable-time')?.innerText || '';
+            document.getElementById('edit-input-title').value = currentTitle;
+            document.getElementById('edit-input-time').value = currentTime.replace(/🕒| /g, '');
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+        function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
+        function saveSpotChange() {
+            if (currentEditingElement) {
+                const newTitle = document.getElementById('edit-input-title').value;
+                const newTime = document.getElementById('edit-input-time').value;
+                if(currentEditingElement.querySelector('.editable-title')) currentEditingElement.querySelector('.editable-title').innerText = newTitle;
+                if(currentEditingElement.querySelector('.editable-time') && newTime) currentEditingElement.querySelector('.editable-time').innerHTML = `<i class="fa-regular fa-clock mr-1"></i>${newTime}`;
+            }
+            closeEditModal();
+        }
+
+        // 記帳與拆帳核心邏輯
+        let bills = [];
+        const members = ['Lee', 'Lin', 'Song', 'Wu'];
+
+        function addBillItem() {
+            const desc = document.getElementById('bill-desc').value.trim();
+            const amount = parseFloat(document.getElementById('bill-amount').value);
+            const payer = document.querySelector('input[name="payer"]:checked').value;
+
+            if (!desc || isNaN(amount) || amount <= 0) {
+                alert('請填寫完整項目與金額！');
+                return;
+            }
+
+            bills.push({ id: Date.now(), desc, amount, payer });
+            document.getElementById('bill-desc').value = '';
+            document.getElementById('bill-amount').value = '';
+            renderBills();
+        }
+
+        function deleteBill(id) {
+            bills = bills.filter(b => b.id !== id);
+            renderBills();
+        }
+
+        function renderBills() {
+            const listContainer = document.getElementById('bill-list');
+            if (bills.length === 0) {
+                listContainer.innerHTML = '<p class="text-center text-gray-400 py-4">暫無花費</p>';
+                document.getElementById('settlement-result').innerHTML = '均分計算將顯示於此...';
+                return;
+            }
+
+            // 渲染左側小清單
+            listContainer.innerHTML = bills.map(b => `
+                <div class="flex justify-between items-center bg-white px-2 py-1 rounded-md border border-gray-100 text-[10px]">
+                    <div class="truncate max-w-[65px]">
+                        <span class="font-bold">${b.desc}</span>
+                        <span class="text-[9px] text-fuji block">(${b.payer})</span>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <span class="font-bold text-fuji">$${b.amount}</span>
+                        <button onclick="deleteBill(${b.id})" class="text-red-400"><i class="fa-regular fa-trash-can"></i></button>
+                    </div>
+                </div>
+            `).join('');
+
+            // 計算核心
+            let totalExpenses = 0;
+            let paidBy = { Lee: 0, Lin: 0, Song: 0, Wu: 0 };
+            bills.forEach(b => { totalExpenses += b.amount; paidBy[b.payer] += b.amount; });
+
+            const sharePerPerson = totalExpenses / 4;
+            let balance = {};
+            members.forEach(m => { balance[m] = paidBy[m] - sharePerPerson; });
+
+            let creditors = []; let debtors = [];
+            members.forEach(m => {
+                if (balance[m] > 0) creditors.push({ name: m, amount: balance[m] });
+                if (balance[m] < 0) debtors.push({ name: m, amount: Math.abs(balance[m]) });
+            });
+
+            let transferLines = [];
+            let c = 0, d = 0;
+            let credCopy = JSON.parse(JSON.stringify(creditors));
+            let debtCopy = JSON.parse(JSON.stringify(debtors));
+
+            while (c < credCopy.length && d < debtCopy.length) {
+                let credit = credCopy[c]; let debtor = debtCopy[d];
+                let amount = Math.min(credit.amount, debtor.amount);
+                transferLines.push(`▪️${debtor.name} ➔ ${credit.name} $${amount.toFixed(0)}`);
+                credit.amount -= amount; debtor.amount -= amount;
+                if (Math.abs(credit.amount) < 0.1) c++; if (Math.abs(debtor.amount) < 0.1) d++;
+            }
+
+            // 渲染右側清算結果
+            document.getElementById('settlement-result').innerHTML = `
+                <p class="font-bold text-gray-800">總計:$${totalExpenses.toFixed(0)} (均分:$${sharePerPerson.toFixed(0)})</p>
+                <div class="mt-0.5 space-y-0.5 border-t border-gray-200/60 pt-0.5 text-gray-500">
+                    ${transferLines.length > 0 ? transferLines.join('<br>') : '🍀 金額剛好平分！'}
+                </div>
+            `;
+        }
+
+        function copyToLine() {
+            if (bills.length === 0) { alert('目前沒有花費紀錄可以複製唷！'); return; }
+
+            let totalExpenses = 0;
+            let paidBy = { Lee: 0, Lin: 0, Song: 0, Wu: 0 };
+            bills.forEach(b => { totalExpenses += b.amount; paidBy[b.payer] += b.amount; });
+            const sharePerPerson = totalExpenses / 4;
+
+            let balance = {};
+            members.forEach(m => { balance[m] = paidBy[m] - sharePerPerson; });
+
+            let creditors = []; let debtors = [];
+            members.forEach(m => {
+                if (balance[m] > 0) creditors.push({ name: m, amount: balance[m] });
+                if (balance[m] < 0) debtors.push({ name: m, amount: Math.abs(balance[m]) });
+            });
+
+            let transferLines = [];
+            let c = 0, d = 0;
+            while (c < creditors.length && d < debtors.length) {
+                let credit = creditors[c]; let debtor = debtors[d];
+                let amount = Math.min(credit.amount, debtor.amount);
+                transferLines.push(`  ▪️ ${debtor.name} ➡️ 匯給 ${credit.name}：$${amount.toFixed(0)} 元`);
+                credit.amount -= amount; debtor.amount -= amount;
+                if (Math.abs(credit.amount) < 0.1) c++; if (Math.abs(debtor.amount) < 0.1) d++;
+            }
+
+            let msg = `🏝️ 金門微醺夏意之旅 - 手機分帳報告 🏝️\n`;
+            msg += `💰 總花費金額：$${totalExpenses.toFixed(0)} 元\n`;
+            msg += `💵 每人應均分：$${sharePerPerson.toFixed(0)} 元\n\n`;
+            msg += `📝 【消費明細摘要】\n`;
+            bills.forEach(b => { msg += ` · ${b.desc} : $${b.amount} (${b.payer}代墊)\n`; });
+            msg += `\n📣 【最終轉帳通知】\n`;
+            msg += transferLines.length > 0 ? transferLines.join('\n') : '  ▪️ 大家都互不相欠囉！';
+            msg += `\n\n小夥伴們確認無誤後就可以動手轉帳囉 ❤️`;
+
+            navigator.clipboard.writeText(msg).then(() => {
+                alert('✅ 分帳報告已複製！趕快去 LINE 群組貼上吧！');
+            }).catch(err => { alert('複製失敗，請手動複製。'); });
+        }
+    </script>
+</body>
+</html>
